@@ -8,22 +8,16 @@ import {
   insertAnalyticsEventSchema,
   insertFanPhotoSchema 
 } from "@shared/schema";
-import { getSimpleSession, requireAuth, loginHandler, logoutHandler, getUserHandler, registerHandler } from "./simpleAuth";
+import { requireFirebaseAuth, getCurrentUser, type AuthenticatedRequest } from "./firebaseAuth";
 import { seedDatabase } from "./seed";
 import { z } from "zod";
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Initialize session middleware
-  app.use(getSimpleSession());
-  
   // Seed database on startup
   await seedDatabase();
 
-  // Auth routes
-  app.post('/api/auth/login', loginHandler);
-  app.post('/api/auth/register', registerHandler);
-  app.post('/api/auth/logout', logoutHandler);
-  app.get('/api/auth/user', getUserHandler);
+  // Firebase Auth routes
+  app.get('/api/auth/user', requireFirebaseAuth, getCurrentUser);
 
   // Contact form submission endpoint
   app.post("/api/contact", async (req, res) => {
@@ -48,7 +42,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Admin routes (protected)
-  app.get("/api/admin/contact-messages", requireAuth, async (req, res) => {
+  app.get("/api/admin/contact-messages", requireFirebaseAuth, async (req, res) => {
     try {
       const messages = await storage.getContactMessages();
       res.json(messages);
@@ -58,7 +52,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.patch("/api/admin/contact-messages/:id", requireAuth, async (req, res) => {
+  app.patch("/api/admin/contact-messages/:id", requireFirebaseAuth, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
       const updates = req.body;
@@ -71,7 +65,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Product management routes
-  app.get("/api/admin/products", requireAuth, async (req, res) => {
+  app.get("/api/admin/products", requireFirebaseAuth, async (req, res) => {
     try {
       const products = await storage.getProducts();
       res.json(products);
@@ -92,7 +86,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/admin/products", requireAuth, async (req, res) => {
+  app.post("/api/admin/products", requireFirebaseAuth, async (req, res) => {
     try {
       const result = insertProductSchema.safeParse(req.body);
       if (!result.success) {
@@ -110,7 +104,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.patch("/api/admin/products/:id", requireAuth, async (req, res) => {
+  app.patch("/api/admin/products/:id", requireFirebaseAuth, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
       const updates = req.body;
@@ -122,7 +116,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete("/api/admin/products/:id", requireAuth, async (req, res) => {
+  app.delete("/api/admin/products/:id", requireFirebaseAuth, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
       await storage.deleteProduct(id);
@@ -134,7 +128,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Customer management routes
-  app.get("/api/admin/customers", requireAuth, async (req, res) => {
+  app.get("/api/admin/customers", requireFirebaseAuth, async (req, res) => {
     try {
       const customers = await storage.getCustomers();
       res.json(customers);
@@ -144,7 +138,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.patch("/api/admin/customers/:id", requireAuth, async (req, res) => {
+  app.patch("/api/admin/customers/:id", requireFirebaseAuth, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
       const updates = req.body;
@@ -157,7 +151,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Order management routes
-  app.get("/api/admin/orders", requireAuth, async (req, res) => {
+  app.get("/api/admin/orders", requireFirebaseAuth, async (req, res) => {
     try {
       const orders = await storage.getOrders();
       res.json(orders);
@@ -167,7 +161,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.patch("/api/admin/orders/:id/status", requireAuth, async (req, res) => {
+  app.patch("/api/admin/orders/:id/status", requireFirebaseAuth, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
       const { status } = req.body;
@@ -198,7 +192,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/admin/analytics", requireAuth, async (req, res) => {
+  app.get("/api/admin/analytics", requireFirebaseAuth, async (req, res) => {
     try {
       const limit = req.query.limit ? parseInt(req.query.limit as string) : 100;
       const events = await storage.getAnalyticsEvents(limit);
@@ -210,7 +204,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Dashboard stats
-  app.get("/api/admin/stats", requireAuth, async (req, res) => {
+  app.get("/api/admin/stats", requireFirebaseAuth, async (req, res) => {
     try {
       const [products, customers, orders, messages] = await Promise.all([
         storage.getProducts(),
@@ -240,7 +234,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Fan Gallery routes
-  app.post("/api/fan-gallery", requireAuth, async (req, res) => {
+  app.post("/api/fan-gallery", requireFirebaseAuth, async (req, res) => {
     try {
       const result = insertFanPhotoSchema.safeParse(req.body);
       if (!result.success) {
@@ -275,7 +269,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Admin fan gallery routes
-  app.get("/api/admin/fan-gallery", requireAuth, async (req, res) => {
+  app.get("/api/admin/fan-gallery", requireFirebaseAuth, async (req, res) => {
     try {
       const photos = await storage.getFanPhotos();
       res.json(photos);
@@ -285,7 +279,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/admin/fan-gallery/pending", requireAuth, async (req, res) => {
+  app.get("/api/admin/fan-gallery/pending", requireFirebaseAuth, async (req, res) => {
     try {
       const photos = await storage.getPendingFanPhotos();
       res.json(photos);
@@ -295,7 +289,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.patch("/api/admin/fan-gallery/:id/approve", requireAuth, async (req, res) => {
+  app.patch("/api/admin/fan-gallery/:id/approve", requireFirebaseAuth, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
       const adminUser = (req.session as any).user?.username || "admin";
@@ -308,7 +302,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.patch("/api/admin/fan-gallery/:id/reject", requireAuth, async (req, res) => {
+  app.patch("/api/admin/fan-gallery/:id/reject", requireFirebaseAuth, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
       const adminUser = (req.session as any).user?.username || "admin";
@@ -321,7 +315,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete("/api/admin/fan-gallery/:id", requireAuth, async (req, res) => {
+  app.delete("/api/admin/fan-gallery/:id", requireFirebaseAuth, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
       await storage.deleteFanPhoto(id);
@@ -333,7 +327,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // User photo routes (authenticated)
-  app.get("/api/user/my-photos", requireAuth, async (req, res) => {
+  app.get("/api/user/my-photos", requireFirebaseAuth, async (req, res) => {
     try {
       const userId = (req.session as any).user?.id;
       if (!userId) {

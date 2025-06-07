@@ -25,13 +25,12 @@ export const sessions = pgTable(
   (table) => [index("IDX_session_expire").on(table.expire)],
 );
 
-// Admin users table for Replit Auth
+// Admin users table for Firebase Auth
 export const adminUsers = pgTable("admin_users", {
-  id: varchar("id").primaryKey().notNull(),
+  id: varchar("id").primaryKey().notNull(), // Firebase UID
   email: varchar("email").unique(),
-  firstName: varchar("first_name"),
-  lastName: varchar("last_name"),
-  profileImageUrl: varchar("profile_image_url"),
+  displayName: varchar("display_name"),
+  photoURL: varchar("photo_url"),
   role: varchar("role", { length: 50 }).notNull().default("admin"),
   isActive: boolean("is_active").notNull().default(true),
   createdAt: timestamp("created_at").defaultNow().notNull(),
@@ -223,7 +222,14 @@ export const insertFanPhotoSchema = createInsertSchema(fanPhotos).pick({
   imageData: true,
 });
 
-export const upsertAdminUserSchema = createInsertSchema(adminUsers);
+export const upsertAdminUserSchema = createInsertSchema(adminUsers).pick({
+  id: true,
+  email: true,
+  displayName: true,
+  photoURL: true,
+  role: true,
+  isActive: true,
+});
 
 // Type exports
 export type InsertUser = z.infer<typeof insertUserSchema>;

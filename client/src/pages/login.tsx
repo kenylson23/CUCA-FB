@@ -1,157 +1,82 @@
-import { useState } from "react";
+import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { User } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { useMutation } from "@tanstack/react-query";
-import { Eye, EyeOff, Lock, User, Mail, UserPlus } from "lucide-react";
+import { useFirebaseAuth } from "@/hooks/useFirebaseAuth";
+import { useLocation } from "wouter";
 
 export default function LoginPage() {
-  // Login form state
-  const [loginData, setLoginData] = useState({
-    username: "",
-    password: ""
-  });
-  
-  // Register form state
-  const [registerData, setRegisterData] = useState({
-    name: "",
-    email: "",
-    username: "",
-    password: "",
-    confirmPassword: ""
-  });
-  
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const { user, loading, error, login, isAuthenticated } = useFirebaseAuth();
   const { toast } = useToast();
+  const [, setLocation] = useLocation();
 
-  const loginMutation = useMutation({
-    mutationFn: async (credentials: { username: string; password: string }) => {
-      const response = await fetch("/api/auth/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(credentials),
-      });
-      
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || "Erro no login");
-      }
-      
-      return response.json();
-    },
-    onSuccess: (data) => {
+  useEffect(() => {
+    if (isAuthenticated && user) {
       toast({
         title: "Login realizado com sucesso!",
-        description: "Bem-vindo de volta!",
+        description: `Bem-vindo, ${user.displayName || user.email}!`,
       });
+      
+      // Redirecionar para admin se o usuário for autenticado
       setTimeout(() => {
-        // Redirecionar baseado no tipo de usuário
-        if (data.user && data.user.role === "admin") {
-          window.location.href = "/admin";
-        } else if (data.user && data.user.role === "user") {
-          window.location.href = "/dashboard";
-        } else {
-          window.location.href = "/";
-        }
+        setLocation("/admin");
       }, 1000);
-    },
-    onError: (error: Error) => {
+    }
+  }, [isAuthenticated, user, toast, setLocation]);
+
+  useEffect(() => {
+    if (error) {
       toast({
         title: "Erro no login",
-        description: error.message,
+        description: error,
         variant: "destructive",
       });
-    },
-  });
-
-  const registerMutation = useMutation({
-    mutationFn: async (userData: typeof registerData) => {
-      const response = await fetch("/api/auth/register", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(userData),
-      });
-      
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || "Erro no cadastro");
-      }
-      
-      return response.json();
-    },
-    onSuccess: (data) => {
-      toast({
-        title: "Cadastro realizado com sucesso!",
-        description: "Seja bem-vindo à CUCA!",
-      });
-      setTimeout(() => {
-        window.location.href = "/";
-      }, 1000);
-    },
-    onError: (error: Error) => {
-      toast({
-        title: "Erro no cadastro",
-        description: error.message,
-        variant: "destructive",
-      });
-    },
-  });
-
-  const handleLogin = (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!loginData.username || !loginData.password) {
-      toast({
-        title: "Campos obrigatórios",
-        description: "Por favor, preencha usuário e senha.",
-        variant: "destructive",
-      });
-      return;
     }
+  }, [error, toast]);
 
-    loginMutation.mutate(loginData);
+  const handleGoogleLogin = async () => {
+    try {
+      await login();
+    } catch (err) {
+      console.error("Erro no login:", err);
+    }
   };
 
-  const handleRegister = (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!registerData.name || !registerData.email || !registerData.username || !registerData.password) {
-      toast({
-        title: "Campos obrigatórios",
-        description: "Por favor, preencha todos os campos.",
-        variant: "destructive",
-      });
-      return;
-    }
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-cuca-red/10 to-cuca-yellow/10 p-4">
+        <Card className="w-full max-w-md">
+          <CardContent className="flex items-center justify-center p-8">
+            <div className="flex items-center gap-2">
+              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-cuca-red"></div>
+              <span>Carregando...</span>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
-    if (registerData.password !== registerData.confirmPassword) {
-      toast({
-        title: "Senhas não coincidem",
-        description: "As senhas digitadas são diferentes.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (registerData.password.length < 6) {
-      toast({
-        title: "Senha muito curta",
-        description: "A senha deve ter pelo menos 6 caracteres.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    registerMutation.mutate(registerData);
-  };
+  if (isAuthenticated) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-cuca-red/10 to-cuca-yellow/10 p-4">
+        <Card className="w-full max-w-md">
+          <CardContent className="flex items-center justify-center p-8">
+            <div className="text-center space-y-4">
+              <div className="mx-auto w-16 h-16 bg-green-500 rounded-full flex items-center justify-center">
+                <User className="h-8 w-8 text-white" />
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold">Login realizado!</h3>
+                <p className="text-muted-foreground">Redirecionando...</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-cuca-red/10 to-cuca-yellow/10 p-4">
@@ -164,207 +89,45 @@ export default function LoginPage() {
             Bem-vindo à CUCA
           </CardTitle>
           <CardDescription>
-            Entre na sua conta ou crie uma nova
+            Entre com sua conta Google para acessar o painel administrativo
           </CardDescription>
         </CardHeader>
-        <CardContent>
-          <Tabs defaultValue="login" className="w-full">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="login">Entrar</TabsTrigger>
-              <TabsTrigger value="register">Cadastrar</TabsTrigger>
-            </TabsList>
-            
-            <TabsContent value="login" className="space-y-4 mt-6">
-              <form onSubmit={handleLogin} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="login-username">Usuário</Label>
-                  <div className="relative">
-                    <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      id="login-username"
-                      type="text"
-                      placeholder="Digite seu usuário"
-                      value={loginData.username}
-                      onChange={(e) => setLoginData({...loginData, username: e.target.value})}
-                      className="pl-10"
-                    />
-                  </div>
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="login-password">Senha</Label>
-                  <div className="relative">
-                    <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      id="login-password"
-                      type={showPassword ? "text" : "password"}
-                      placeholder="Digite sua senha"
-                      value={loginData.password}
-                      onChange={(e) => setLoginData({...loginData, password: e.target.value})}
-                      className="pl-10 pr-10"
-                    />
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                      onClick={() => setShowPassword(!showPassword)}
-                    >
-                      {showPassword ? (
-                        <EyeOff className="h-4 w-4 text-muted-foreground" />
-                      ) : (
-                        <Eye className="h-4 w-4 text-muted-foreground" />
-                      )}
-                    </Button>
-                  </div>
-                </div>
-
-                <Button
-                  type="submit"
-                  className="w-full bg-cuca-red hover:bg-cuca-red/90"
-                  disabled={loginMutation.isPending}
-                >
-                  {loginMutation.isPending ? (
-                    <div className="flex items-center gap-2">
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                      Entrando...
-                    </div>
-                  ) : (
-                    "Entrar"
-                  )}
-                </Button>
-              </form>
-            </TabsContent>
-
-            <TabsContent value="register" className="space-y-4 mt-6">
-              <form onSubmit={handleRegister} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="register-name">Nome Completo</Label>
-                  <div className="relative">
-                    <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      id="register-name"
-                      type="text"
-                      placeholder="Digite seu nome completo"
-                      value={registerData.name}
-                      onChange={(e) => setRegisterData({...registerData, name: e.target.value})}
-                      className="pl-10"
-                    />
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="register-email">Email</Label>
-                  <div className="relative">
-                    <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      id="register-email"
-                      type="email"
-                      placeholder="Digite seu email"
-                      value={registerData.email}
-                      onChange={(e) => setRegisterData({...registerData, email: e.target.value})}
-                      className="pl-10"
-                    />
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="register-username">Usuário</Label>
-                  <div className="relative">
-                    <UserPlus className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      id="register-username"
-                      type="text"
-                      placeholder="Escolha um nome de usuário"
-                      value={registerData.username}
-                      onChange={(e) => setRegisterData({...registerData, username: e.target.value})}
-                      className="pl-10"
-                    />
-                  </div>
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="register-password">Senha</Label>
-                  <div className="relative">
-                    <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      id="register-password"
-                      type={showPassword ? "text" : "password"}
-                      placeholder="Digite sua senha (min. 6 caracteres)"
-                      value={registerData.password}
-                      onChange={(e) => setRegisterData({...registerData, password: e.target.value})}
-                      className="pl-10 pr-10"
-                    />
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                      onClick={() => setShowPassword(!showPassword)}
-                    >
-                      {showPassword ? (
-                        <EyeOff className="h-4 w-4 text-muted-foreground" />
-                      ) : (
-                        <Eye className="h-4 w-4 text-muted-foreground" />
-                      )}
-                    </Button>
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="register-confirm-password">Confirmar Senha</Label>
-                  <div className="relative">
-                    <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      id="register-confirm-password"
-                      type={showConfirmPassword ? "text" : "password"}
-                      placeholder="Confirme sua senha"
-                      value={registerData.confirmPassword}
-                      onChange={(e) => setRegisterData({...registerData, confirmPassword: e.target.value})}
-                      className="pl-10 pr-10"
-                    />
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                    >
-                      {showConfirmPassword ? (
-                        <EyeOff className="h-4 w-4 text-muted-foreground" />
-                      ) : (
-                        <Eye className="h-4 w-4 text-muted-foreground" />
-                      )}
-                    </Button>
-                  </div>
-                </div>
-
-                <Button
-                  type="submit"
-                  className="w-full bg-cuca-yellow text-cuca-black hover:bg-cuca-yellow/90"
-                  disabled={registerMutation.isPending}
-                >
-                  {registerMutation.isPending ? (
-                    <div className="flex items-center gap-2">
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-cuca-black"></div>
-                      Cadastrando...
-                    </div>
-                  ) : (
-                    "Criar Conta"
-                  )}
-                </Button>
-              </form>
-            </TabsContent>
-          </Tabs>
-
-          <div className="mt-6 text-center">
-            <Button
-              variant="outline"
-              onClick={() => window.location.href = "/"}
-              className="w-full"
-            >
-              Voltar ao site
-            </Button>
+        <CardContent className="space-y-4">
+          <Button
+            onClick={handleGoogleLogin}
+            className="w-full bg-cuca-red hover:bg-cuca-red/90 text-white"
+            disabled={loading}
+            size="lg"
+          >
+            {loading ? (
+              <div className="flex items-center gap-2">
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                Entrando...
+              </div>
+            ) : (
+              <div className="flex items-center gap-2">
+                <svg className="w-5 h-5" viewBox="0 0 24 24">
+                  <path fill="currentColor" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                  <path fill="currentColor" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                  <path fill="currentColor" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                  <path fill="currentColor" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                </svg>
+                Entrar com Google
+              </div>
+            )}
+          </Button>
+          
+          <div className="text-center text-sm text-muted-foreground">
+            <p>
+              Ao fazer login, você concorda com nossos{" "}
+              <a href="#" className="text-cuca-red hover:underline">
+                Termos de Serviço
+              </a>{" "}
+              e{" "}
+              <a href="#" className="text-cuca-red hover:underline">
+                Política de Privacidade
+              </a>
+            </p>
           </div>
         </CardContent>
       </Card>

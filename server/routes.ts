@@ -74,14 +74,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ message: 'Credenciais inválidas' });
       }
       
-      // Set session or return user data
+      // Determine user role - check if this is an admin account
+      let userRole = 'customer';
+      
+      // Check for admin credentials (you can modify these conditions)
+      if (username.toLowerCase().includes('admin') || 
+          user.email?.toLowerCase().includes('admin') ||
+          username === 'admin' || // Default admin username
+          user.firstName?.toLowerCase() === 'admin') {
+        userRole = 'admin';
+      }
+      
+      // Set session
       req.session = req.session || {};
       (req.session as any).userId = user.id;
-      (req.session as any).userType = 'customer';
+      (req.session as any).userType = userRole === 'admin' ? 'admin' : 'customer';
       
       // Don't return password
       const { password: _, ...userData } = user;
-      res.json({ success: true, user: { ...userData, role: 'customer' } });
+      res.json({ success: true, user: { ...userData, role: userRole } });
     } catch (error) {
       console.error('Login error:', error);
       res.status(500).json({ message: 'Erro interno do servidor' });

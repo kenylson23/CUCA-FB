@@ -41,13 +41,19 @@ export const requireFirebaseAuth: RequestHandler = async (
     let user = await storage.getUser(userClaims.sub);
     
     if (!user) {
+      // Determinar role baseado no email - pode ser configurado conforme necessário
+      const isAdminEmail = userClaims.email && (
+        userClaims.email.includes('admin') || 
+        userClaims.email === 'your-admin-email@gmail.com' // Configure seu email admin aqui
+      );
+      
       // Criar usuário se não existir
       user = await storage.upsertUser({
         id: userClaims.sub,
         email: userClaims.email,
         displayName: userClaims.name || userClaims.email,
         photoURL: userClaims.picture,
-        role: 'admin',
+        role: isAdminEmail ? 'admin' : 'user',
         isActive: true,
       });
     }

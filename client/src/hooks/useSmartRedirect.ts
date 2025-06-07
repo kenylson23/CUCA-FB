@@ -31,17 +31,17 @@ export function useSmartRedirect(redirects: Partial<RedirectConfig> = {}) {
   useEffect(() => {
     if (isLoading || !isAuthenticated || !user) return;
 
-    // Determine redirect based on user role/type
+    // Determine redirect based on user role from database
     let redirectPath = finalRedirects.default;
     
-    // Type guard to ensure user has necessary properties
     if (user && typeof user === 'object') {
       const typedUser = user as UserWithRole;
       
+      // Check role from database - both Firebase and traditional users can be admin
       if (typedUser.role === 'admin') {
         redirectPath = finalRedirects.admin;
-      } else if (typedUser.role === 'customer' || typedUser.username) {
-        // Customer users have username field
+      } else {
+        // Default to dashboard for all other users
         redirectPath = finalRedirects.customer;
       }
     }

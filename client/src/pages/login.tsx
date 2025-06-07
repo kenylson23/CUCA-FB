@@ -148,7 +148,7 @@ export default function LoginPage() {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
-          {/* Google Login for Admins */}
+          {/* Google Login */}
           <div className="space-y-2">
             <Button
               onClick={handleGoogleLogin}
@@ -171,12 +171,11 @@ export default function LoginPage() {
                     <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
                   </svg>
                   <span>Continuar com Google</span>
-                  <span className="text-xs bg-cuca-red/10 text-cuca-red px-2 py-1 rounded">Admin</span>
                 </div>
               )}
             </Button>
             <p className="text-xs text-center text-muted-foreground">
-              Para administradores - acesso ao painel administrativo
+              Acesso rápido com sua conta Google
             </p>
           </div>
 
@@ -190,11 +189,11 @@ export default function LoginPage() {
             </div>
           </div>
 
-          {/* Traditional Login for Customers */}
+          {/* Traditional Login */}
           <div className="space-y-4">
             <div className="text-center">
-              <h3 className="font-medium">Login de Cliente</h3>
-              <p className="text-sm text-muted-foreground">Use suas credenciais de conta</p>
+              <h3 className="font-medium">Login com Credenciais</h3>
+              <p className="text-sm text-muted-foreground">Use seu nome de usuário e senha</p>
             </div>
             
             <form onSubmit={handleCustomerLogin} className="space-y-4">
@@ -242,16 +241,16 @@ export default function LoginPage() {
                     Entrando...
                   </div>
                 ) : (
-                  "Entrar como Cliente"
+                  "Entrar"
                 )}
               </Button>
             </form>
             
             <div className="text-center text-sm text-muted-foreground">
               <p>
-                Não tem uma conta de cliente?{" "}
+                Não tem uma conta?{" "}
                 <Link href="/register" className="text-cuca-red hover:underline font-medium">
-                  Registre-se aqui
+                  Criar conta
                 </Link>
               </p>
             </div>

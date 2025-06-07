@@ -21,6 +21,109 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Firebase Auth routes
   app.get('/api/auth/user', getCurrentUser);
   
+  // Customer authentication routes
+  app.post('/api/auth/register', async (req, res) => {
+    try {
+      const validatedData = insertUserSchema.parse(req.body);
+      
+      // Check if username or email already exists
+      const existingUser = await storage.getCustomerByUsername(validatedData.username);
+      if (existingUser) {
+        return res.status(400).json({ message: 'Nome de usuário já existe' });
+      }
+      
+      // Hash password
+      const hashedPassword = await bcrypt.hash(validatedData.password, 10);
+      
+      // Create customer
+      const customer = await storage.createCustomer({
+        ...validatedData,
+        password: hashedPassword,
+      });
+      
+      // Don't return password
+      const { password, ...customerData } = customer;
+      res.json({ success: true, user: customerData });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        res.status(400).json({ message: 'Dados inválidos', errors: error.errors });
+      } else {
+        console.error('Registration error:', error);
+        res.status(500).json({ message: 'Erro interno do servidor' });
+      }
+    }
+  });
+
+  app.post('/api/auth/login', async (req, res) => {
+    try {
+      const { username, password } = req.body;
+      
+      if (!username || !password) {
+        return res.status(400).json({ message: 'Nome de usuário e senha são obrigatórios' });
+      }
+      
+      // Find user by username
+      const user = await storage.getCustomerByUsername(username);
+      if (!user) {
+        return res.status(401).json({ message: 'Credenciais inválidas' });
+      }
+      
+      // Check password
+      const isValidPassword = await bcrypt.compare(password, user.password);
+      if (!isValidPassword) {
+        return res.status(401).json({ message: 'Credenciais inválidas' });
+      }
+      
+      // Set session or return user data
+      req.session = req.session || {};
+      (req.session as any).userId = user.id;
+      (req.session as any).userType = 'customer';
+      
+      // Don't return password
+      const { password: _, ...userData } = user;
+      res.json({ success: true, user: { ...userData, role: 'customer' } });
+    } catch (error) {
+      console.error('Login error:', error);
+      res.status(500).json({ message: 'Erro interno do servidor' });
+    }
+  });
+
+  app.get('/api/auth/session', async (req, res) => {
+    try {
+      if (!req.session || !(req.session as any).userId) {
+        return res.json({ authenticated: false, user: null });
+      }
+
+      const userId = (req.session as any).userId;
+      const user = await storage.getCustomer(userId);
+      
+      if (!user) {
+        return res.json({ authenticated: false, user: null });
+      }
+
+      // Don't return password
+      const { password, ...userData } = user;
+      res.json({ authenticated: true, user: { ...userData, role: 'customer' } });
+    } catch (error) {
+      console.error('Session check error:', error);
+      res.status(500).json({ message: 'Erro interno do servidor' });
+    }
+  });
+
+  app.post('/api/auth/logout', (req, res) => {
+    if (req.session) {
+      req.session.destroy((err) => {
+        if (err) {
+          console.error('Session destroy error:', err);
+          return res.status(500).json({ message: 'Erro ao fazer logout' });
+        }
+        res.json({ success: true, message: 'Logout realizado com sucesso' });
+      });
+    } else {
+      res.json({ success: true, message: 'Logout realizado com sucesso' });
+    }
+  });
+  
   // Simple auth check endpoint (without requiring token validation)
   app.get('/api/auth/check', (req, res) => {
     // For development, we'll trust the frontend auth state

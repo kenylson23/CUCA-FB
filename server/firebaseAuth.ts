@@ -1,18 +1,22 @@
-import { Request, Response, NextFunction } from 'express';
+import { Request, Response, NextFunction, RequestHandler } from 'express';
 import { storage } from './storage';
 
-export interface AuthenticatedRequest extends Request {
-  user?: {
-    uid: string;
-    email: string;
-    displayName?: string;
-    photoURL?: string;
-  };
+declare global {
+  namespace Express {
+    interface Request {
+      firebaseUser?: {
+        uid: string;
+        email: string;
+        displayName?: string;
+        photoURL?: string;
+      };
+    }
+  }
 }
 
 // Middleware para verificar se o usuário está autenticado via Firebase
-export const requireFirebaseAuth = async (
-  req: AuthenticatedRequest,
+export const requireFirebaseAuth: RequestHandler = async (
+  req: Request,
   res: Response,
   next: NextFunction
 ) => {
@@ -48,7 +52,7 @@ export const requireFirebaseAuth = async (
       });
     }
 
-    req.user = {
+    req.firebaseUser = {
       uid: user.id,
       email: user.email || '',
       displayName: user.displayName || undefined,
@@ -63,13 +67,13 @@ export const requireFirebaseAuth = async (
 };
 
 // Rota para obter informações do usuário autenticado
-export const getCurrentUser = async (req: AuthenticatedRequest, res: Response) => {
+export const getCurrentUser: RequestHandler = async (req: Request, res: Response) => {
   try {
-    if (!req.user) {
+    if (!req.firebaseUser) {
       return res.status(401).json({ message: 'Usuário não autenticado' });
     }
 
-    const user = await storage.getUser(req.user.uid);
+    const user = await storage.getUser(req.firebaseUser.uid);
     
     if (!user) {
       return res.status(404).json({ message: 'Usuário não encontrado' });

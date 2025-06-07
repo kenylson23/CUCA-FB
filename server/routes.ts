@@ -8,7 +8,7 @@ import {
   insertAnalyticsEventSchema,
   insertFanPhotoSchema 
 } from "@shared/schema";
-import { requireFirebaseAuth, getCurrentUser, type AuthenticatedRequest } from "./firebaseAuth";
+import { requireFirebaseAuth, getCurrentUser } from "./firebaseAuth";
 import { seedDatabase } from "./seed";
 import { z } from "zod";
 

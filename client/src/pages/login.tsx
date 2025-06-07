@@ -4,30 +4,24 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { User } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useFirebaseAuth } from "@/hooks/useFirebaseAuth";
-import { useLocation } from "wouter";
+import { useSmartRedirect } from "@/hooks/useSmartRedirect";
 
 export default function LoginPage() {
   const { user, loading, error, login, isAuthenticated } = useFirebaseAuth();
   const { toast } = useToast();
-  const [, setLocation] = useLocation();
+  const { isRedirecting, targetPath } = useSmartRedirect();
 
   useEffect(() => {
     console.log('Login page - Auth state:', { isAuthenticated, user: user ? { email: user.email, displayName: user.displayName } : null });
     
     if (isAuthenticated && user) {
-      console.log('User authenticated, showing success toast and redirecting');
+      console.log('User authenticated, showing success toast and redirecting to:', targetPath);
       toast({
         title: "Login realizado com sucesso!",
         description: `Bem-vindo, ${user.displayName || user.email}!`,
       });
-      
-      // Redirecionar para admin se o usuário for autenticado
-      setTimeout(() => {
-        console.log('Redirecting to /admin');
-        setLocation("/admin");
-      }, 1000);
     }
-  }, [isAuthenticated, user, toast, setLocation]);
+  }, [isAuthenticated, user, toast, targetPath]);
 
   useEffect(() => {
     if (error) {
@@ -65,6 +59,15 @@ export default function LoginPage() {
   }
 
   if (isAuthenticated) {
+    const getRedirectMessage = () => {
+      if (targetPath === '/admin') {
+        return 'Redirecionando para o painel administrativo...';
+      } else if (targetPath === '/dashboard') {
+        return 'Redirecionando para seu painel pessoal...';
+      }
+      return 'Redirecionando...';
+    };
+
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-cuca-red/10 to-cuca-yellow/10 p-4">
         <Card className="w-full max-w-md">
@@ -75,7 +78,7 @@ export default function LoginPage() {
               </div>
               <div>
                 <h3 className="text-lg font-semibold">Login realizado!</h3>
-                <p className="text-muted-foreground">Redirecionando...</p>
+                <p className="text-muted-foreground">{getRedirectMessage()}</p>
               </div>
             </div>
           </CardContent>

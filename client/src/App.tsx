@@ -5,7 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Suspense, lazy } from "react";
 import { useCriticalResourcePreload } from "@/hooks/use-image-preload";
-import { useAuth } from "@/hooks/useAuth";
+import { AdminRoute, CustomerRoute, PublicRoute } from "@/components/RouteGuard";
 
 // Lazy loading dos componentes de página
 const Home = lazy(() => import("@/pages/home"));

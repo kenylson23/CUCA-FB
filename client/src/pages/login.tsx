@@ -12,7 +12,10 @@ export default function LoginPage() {
   const [, setLocation] = useLocation();
 
   useEffect(() => {
+    console.log('Login page - Auth state:', { isAuthenticated, user: user ? { email: user.email, displayName: user.displayName } : null });
+    
     if (isAuthenticated && user) {
+      console.log('User authenticated, showing success toast and redirecting');
       toast({
         title: "Login realizado com sucesso!",
         description: `Bem-vindo, ${user.displayName || user.email}!`,
@@ -20,6 +23,7 @@ export default function LoginPage() {
       
       // Redirecionar para admin se o usuário for autenticado
       setTimeout(() => {
+        console.log('Redirecting to /admin');
         setLocation("/admin");
       }, 1000);
     }
@@ -37,7 +41,9 @@ export default function LoginPage() {
 
   const handleGoogleLogin = async () => {
     try {
+      console.log('Login button clicked, starting Google sign in...');
       await login();
+      console.log('Login function completed');
     } catch (err) {
       console.error("Erro no login:", err);
     }

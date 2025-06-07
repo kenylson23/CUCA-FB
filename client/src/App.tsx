@@ -35,14 +35,49 @@ function Router() {
   return (
     <Suspense fallback={<PageLoader />}>
       <Switch>
-        <Route path="/" component={Home} />
-        <Route path="/pontos-venda" component={PontosVenda} />
-        <Route path="/galeria-fas" component={GaleriaFas} />
+        {/* Public routes - accessible to everyone */}
+        <Route path="/">
+          <PublicRoute>
+            <Home />
+          </PublicRoute>
+        </Route>
+        <Route path="/pontos-venda">
+          <PublicRoute>
+            <PontosVenda />
+          </PublicRoute>
+        </Route>
+        <Route path="/galeria-fas">
+          <PublicRoute>
+            <GaleriaFas />
+          </PublicRoute>
+        </Route>
         <Route path="/login" component={lazy(() => import("@/pages/login"))} />
-        <Route path="/admin" component={AdminPanel} />
-        <Route path="/admin-galeria" component={AdminGaleria} />
-        <Route path="/admin/galeria" component={AdminGaleria} />
-        <Route path="/dashboard" component={Dashboard} />
+        <Route path="/register" component={lazy(() => import("@/pages/register"))} />
+        
+        {/* Admin-only routes */}
+        <Route path="/admin">
+          <AdminRoute>
+            <AdminPanel />
+          </AdminRoute>
+        </Route>
+        <Route path="/admin-galeria">
+          <AdminRoute>
+            <AdminGaleria />
+          </AdminRoute>
+        </Route>
+        <Route path="/admin/galeria">
+          <AdminRoute>
+            <AdminGaleria />
+          </AdminRoute>
+        </Route>
+        
+        {/* Customer routes - for registered customers */}
+        <Route path="/dashboard">
+          <CustomerRoute>
+            <Dashboard />
+          </CustomerRoute>
+        </Route>
+        
         <Route component={NotFound} />
       </Switch>
     </Suspense>

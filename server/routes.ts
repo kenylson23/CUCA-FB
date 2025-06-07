@@ -6,11 +6,13 @@ import {
   insertProductSchema,
   insertOrderSchema,
   insertAnalyticsEventSchema,
-  insertFanPhotoSchema 
+  insertFanPhotoSchema,
+  insertUserSchema 
 } from "@shared/schema";
 import { getCurrentUser } from "./firebaseAuth";
 import { seedDatabase } from "./seed";
 import { z } from "zod";
+import bcrypt from "bcrypt";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Seed database on startup

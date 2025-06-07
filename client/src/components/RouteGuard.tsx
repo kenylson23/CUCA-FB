@@ -100,11 +100,36 @@ export function AdminRoute({ children }: { children: ReactNode }) {
 }
 
 export function CustomerRoute({ children }: { children: ReactNode }) {
-  return (
-    <RouteGuard allowedRoles={['customer']} redirectTo="/login">
-      {children}
-    </RouteGuard>
-  );
+  const { user, isAuthenticated, isLoading } = useAuth();
+  
+  // Allow access if user is authenticated and either has customer role or has username (traditional customer)
+  const hasCustomerAccess = isAuthenticated && user && 
+    ((user as any)?.role === 'customer' || (user as any)?.username);
+  
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-cuca-red/10 to-cuca-yellow/10">
+        <Card className="w-full max-w-md">
+          <CardContent className="flex items-center justify-center p-8">
+            <div className="flex items-center gap-2">
+              <Loader2 className="h-6 w-6 animate-spin text-cuca-red" />
+              <span>Verificando autenticação...</span>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+  
+  if (!hasCustomerAccess) {
+    return (
+      <RouteGuard requireAuth={true} redirectTo="/login">
+        {children}
+      </RouteGuard>
+    );
+  }
+  
+  return <>{children}</>;
 }
 
 export function PublicRoute({ children }: { children: ReactNode }) {

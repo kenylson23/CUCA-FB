@@ -22,6 +22,20 @@ export function useAuth() {
     enabled: !firebaseAuthenticated,
     retry: false,
     staleTime: 5 * 60 * 1000, // 5 minutes
+    queryFn: async () => {
+      try {
+        const response = await fetch('/api/auth/session', {
+          credentials: 'include'
+        });
+        if (!response.ok) {
+          return { authenticated: false, user: null };
+        }
+        return await response.json();
+      } catch (error) {
+        // For static deployments like Netlify, return default state
+        return { authenticated: false, user: null };
+      }
+    }
   });
   
   // Buscar dados do usuário do backend quando autenticado via Firebase
@@ -29,6 +43,20 @@ export function useAuth() {
     queryKey: ["/api/auth/user"],
     enabled: firebaseAuthenticated,
     retry: false,
+    queryFn: async () => {
+      try {
+        const response = await fetch('/api/auth/user', {
+          credentials: 'include'
+        });
+        if (!response.ok) {
+          return null;
+        }
+        return await response.json();
+      } catch (error) {
+        // For static deployments, return null
+        return null;
+      }
+    }
   });
 
   // Determine final authentication state

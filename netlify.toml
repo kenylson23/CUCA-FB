@@ -1,15 +1,10 @@
 [build]
   publish = "dist/public"
-  command = "npm run build"
+  command = "node netlify-static-build.js"
 
 [build.environment]
   NODE_VERSION = "20"
   NPM_VERSION = "10"
-
-[[redirects]]
-  from = "/api/*"
-  to = "/.netlify/functions/server/:splat"
-  status = 200
 
 [[redirects]]
   from = "/*"

@@ -50,25 +50,44 @@ export const getQueryFn: <T>(options: {
 }) => QueryFunction<T> =
   ({ on401: unauthorizedBehavior }) =>
   async ({ queryKey }) => {
-    const authHeaders = await getAuthHeaders();
+    const url = queryKey[0] as string;
     
-    const res = await fetch(queryKey[0] as string, {
-      credentials: "include",
-      headers: Object.keys(authHeaders).length > 0 ? authHeaders : undefined,
-    });
+    try {
+      const authHeaders = await getAuthHeaders();
+      
+      const res = await fetch(url, {
+        credentials: "include",
+        headers: Object.keys(authHeaders).length > 0 ? authHeaders : undefined,
+      });
 
-    if (unauthorizedBehavior === "returnNull" && res.status === 401) {
-      return null;
+      if (unauthorizedBehavior === "returnNull" && res.status === 401) {
+        return null;
+      }
+
+      await throwIfResNotOk(res);
+      return await res.json();
+    } catch (error) {
+      // For static deployments, handle auth endpoints gracefully
+      if (url.includes('/api/auth/session')) {
+        return { authenticated: false, user: null };
+      }
+      
+      if (url.includes('/api/auth/user')) {
+        return null;
+      }
+      
+      if (unauthorizedBehavior === "returnNull") {
+        return null;
+      }
+      
+      throw error;
     }
-
-    await throwIfResNotOk(res);
-    return await res.json();
   };
 
 export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      queryFn: getQueryFn({ on401: "throw" }),
+      queryFn: getQueryFn({ on401: "returnNull" }),
       refetchInterval: false,
       refetchOnWindowFocus: false,
       staleTime: Infinity,

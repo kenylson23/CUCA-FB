@@ -19,9 +19,9 @@ async function buildForNetlify() {
     }
     fs.mkdirSync(distDir, { recursive: true });
     
-    // Build the client
-    console.log('Building client with Vite...');
-    execSync(`cd ${clientDir} && npm run build`, { stdio: 'inherit' });
+    // Build only the client for static deployment
+    console.log('Building client for static deployment...');
+    execSync(`cd ${clientDir} && npx vite build --config vite.config.static.js`, { stdio: 'inherit' });
     
     // Verify build output
     const indexPath = path.join(distDir, 'index.html');

@@ -74,7 +74,7 @@ export default function ProductShowcase() {
               whileHover={{ y: -10 }}
               className="group"
             >
-              <Card className="bg-card dark:bg-card rounded-2xl shadow-xl hover:shadow-2xl overflow-hidden transition-all duration-300 border-0 dark:border dark:border-border">
+              <Card className="bg-card dark:bg-card rounded-2xl shadow-xl hover:shadow-2xl overflow-hidden transition-all duration-300 border-0 dark:border dark:border-gray-200">
                 <motion.div
                   className="h-48 sm:h-56 lg:h-64 relative overflow-hidden"
                   whileHover={{ scale: 1.05 }}

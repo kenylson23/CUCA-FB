@@ -9,37 +9,55 @@ const firebaseConfig = {
   appId: import.meta.env.VITE_FIREBASE_APP_ID,
 };
 
-console.log('Firebase config:', {
-  hasApiKey: !!firebaseConfig.apiKey,
-  hasProjectId: !!firebaseConfig.projectId,
-  hasAppId: !!firebaseConfig.appId,
-  authDomain: firebaseConfig.authDomain
-});
+// Check if Firebase configuration is complete
+const isFirebaseConfigured = firebaseConfig.apiKey && firebaseConfig.projectId && firebaseConfig.appId;
 
-const app = initializeApp(firebaseConfig);
-export const auth = getAuth(app);
-export const googleProvider = new GoogleAuthProvider();
+let auth: any = null;
+let googleProvider: GoogleAuthProvider | null = null;
 
-// Configure Google provider
-googleProvider.addScope('email');
-googleProvider.addScope('profile');
+if (isFirebaseConfigured) {
+  const app = initializeApp(firebaseConfig);
+  auth = getAuth(app);
+  googleProvider = new GoogleAuthProvider();
+  googleProvider.addScope('email');
+  googleProvider.addScope('profile');
+}
+
+export { auth, googleProvider };
 
 // Sign in with Google
 export const signInWithGoogle = () => {
-  return signInWithRedirect(auth, googleProvider);
+  if (!auth || !googleProvider) {
+    console.warn('Firebase not configured - authentication unavailable');
+    return Promise.reject(new Error('Firebase not configured'));
+  }
+  return signInWithRedirect(auth, googleProvider as GoogleAuthProvider);
 };
 
 // Handle redirect result
 export const handleRedirectResult = () => {
+  if (!auth) {
+    console.warn('Firebase not configured - authentication unavailable');
+    return Promise.resolve(null);
+  }
   return getRedirectResult(auth);
 };
 
 // Sign out
 export const signOutUser = () => {
+  if (!auth) {
+    console.warn('Firebase not configured - authentication unavailable');
+    return Promise.resolve();
+  }
   return signOut(auth);
 };
 
 // Auth state observer
 export const onAuthStateChange = (callback: (user: any) => void) => {
+  if (!auth) {
+    console.warn('Firebase not configured - authentication unavailable');
+    callback(null);
+    return () => {};
+  }
   return onAuthStateChanged(auth, callback);
 };

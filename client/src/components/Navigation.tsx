@@ -265,7 +265,7 @@ export default function Navigation() {
             exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.3 }}
           >
-            <div className="px-2 pt-2 pb-3 space-y-1 bg-background border-t dark:border-gray-200">
+            <div className="px-2 pt-2 pb-3 space-y-1 bg-background border-t dark:border-border">
               <Link href="/">
                 <motion.span 
                   onClick={() => setIsOpen(false)}

@@ -37,14 +37,18 @@ async function buildStatic() {
     // Use the existing vite configuration but with optimizations for speed
     process.env.NODE_ENV = 'production';
     
-    // Run build command with Netlify-specific config
-    execSync('npx vite build --config vite.config.netlify.ts --mode production', {
+    // Copy main tailwind config to client directory
+    execSync('cp tailwind.config.js client/', {
+      stdio: 'inherit'
+    });
+    
+    // Run build command with standard Vite config
+    execSync('npx vite build --mode production', {
       cwd: path.resolve(__dirname, 'client'),
       stdio: 'inherit',
       env: {
         ...process.env,
-        NODE_ENV: 'production',
-        VITE_BUILD_TARGET: 'netlify'
+        NODE_ENV: 'production'
       }
     });
     

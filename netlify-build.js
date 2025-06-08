@@ -32,6 +32,12 @@ async function buildForNetlify() {
     
     console.log('Running Vite build...');
     
+    // Copy main tailwind config for netlify build
+    execSync('cp ../tailwind.config.js tailwind.config.js', {
+      cwd: clientDir,
+      stdio: 'inherit'
+    });
+    
     // Build with the correct Vite config for Netlify
     execSync('npx vite build --config vite.config.netlify.ts --mode production', {
       cwd: clientDir,

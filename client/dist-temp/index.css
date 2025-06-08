@@ -1,0 +1,182 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700;800&family=Open+Sans:wght@300;400;600;700&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: 0 0% 100%; /* #FFFFFF */
+  --foreground: 0 0% 0%; /* #000000 */
+  --muted: 0 0% 96%; 
+  --muted-foreground: 0 0% 45%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 0 0% 0%;
+  --card: 0 0% 100%;
+  --card-foreground: 0 0% 0%;
+  --border: 0 0% 90%;
+  --input: 0 0% 90%;
+  --primary: 51 100% 50%; /* #FFD700 */
+  --primary-foreground: 0 0% 0%;
+  --secondary: 0 0% 96%;
+  --secondary-foreground: 0 0% 10%;
+  --accent: 0 0% 96%;
+  --accent-foreground: 0 0% 10%;
+  --destructive: 1 77% 49%; /* #D62828 */
+  --destructive-foreground: 0 0% 98%;
+  --ring: 0 0% 0%;
+  --radius: 0.5rem;
+  
+  /* CUCA Brand Colors */
+  --cuca-yellow: 51 100% 50%; /* #FFD700 */
+  --cuca-red: 1 77% 49%; /* #D62828 */
+  --cuca-black: 0 0% 0%; /* #000000 */
+  --cuca-white: 0 0% 100%; /* #FFFFFF */
+}
+
+.dark {
+  --background: 20 14% 4%; /* #0F0A08 - dark brown-black */
+  --foreground: 48 100% 85%; /* #FFF2CC - light cream */
+  --muted: 30 20% 10%; /* #1F1611 - dark brown */
+  --muted-foreground: 48 30% 65%; /* #C4B894 - muted gold */
+  --popover: 20 14% 4%;
+  --popover-foreground: 48 100% 85%;
+  --card: 25 25% 8%; /* #1A1208 - card background */
+  --card-foreground: 48 100% 85%;
+  --border: 30 20% 15%; /* #2B2016 - border color */
+  --input: 30 20% 15%;
+  --primary: 51 100% 50%; /* Keep CUCA yellow */
+  --primary-foreground: 0 0% 0%;
+  --secondary: 30 20% 10%;
+  --secondary-foreground: 48 100% 85%;
+  --accent: 30 20% 15%;
+  --accent-foreground: 48 100% 85%;
+  --destructive: 1 77% 49%; /* Keep CUCA red */
+  --destructive-foreground: 48 100% 85%;
+  --ring: 51 100% 50%; /* CUCA yellow for focus rings */
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply font-sans antialiased bg-background text-foreground;
+    font-family: 'Open Sans', sans-serif;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Montserrat', sans-serif;
+  }
+}
+
+@layer utilities {
+  .font-montserrat {
+    font-family: 'Montserrat', sans-serif;
+  }
+  
+  .font-opensans {
+    font-family: 'Open Sans', sans-serif;
+  }
+  
+  .text-cuca-yellow {
+    color: hsl(var(--cuca-yellow));
+  }
+  
+  .text-cuca-red {
+    color: hsl(var(--cuca-red));
+  }
+  
+  .text-cuca-black {
+    color: hsl(var(--cuca-black));
+  }
+  
+  .text-cuca-white {
+    color: hsl(var(--cuca-white));
+  }
+  
+  .bg-cuca-yellow {
+    background-color: hsl(var(--cuca-yellow));
+  }
+  
+  .bg-cuca-red {
+    background-color: hsl(var(--cuca-red));
+  }
+  
+  .bg-cuca-black {
+    background-color: hsl(var(--cuca-black));
+  }
+  
+  .bg-cuca-white {
+    background-color: hsl(var(--cuca-white));
+  }
+  
+  .border-cuca-yellow {
+    border-color: hsl(var(--cuca-yellow));
+  }
+  
+  .border-cuca-red {
+    border-color: hsl(var(--cuca-red));
+  }
+  
+  .hover\:bg-cuca-red:hover {
+    background-color: hsl(var(--cuca-red));
+  }
+  
+  .hover\:text-cuca-yellow:hover {
+    color: hsl(var(--cuca-yellow));
+  }
+  
+  .hover\:text-cuca-red:hover {
+    color: hsl(var(--cuca-red));
+  }
+  
+  .hover\:text-cuca-white:hover {
+    color: hsl(var(--cuca-white));
+  }
+  
+  .animate-fade-in-up {
+    animation: fadeInUp 0.6s ease-out forwards;
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+  background: hsl(var(--cuca-yellow));
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--cuca-red));
+}
+
+/* Smooth scroll behavior */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Focus styles */
+button:focus,
+input:focus,
+textarea:focus {
+  outline: 2px solid hsl(var(--cuca-yellow));
+  outline-offset: 2px;
+}

@@ -1,0 +1,65 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700;800&family=Open+Sans:wght@300;400;600;700&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: 0 0% 100%;
+  --foreground: 0 0% 0%;
+  --muted: 0 0% 96%;
+  --muted-foreground: 0 0% 45%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 0 0% 0%;
+  --card: 0 0% 100%;
+  --card-foreground: 0 0% 0%;
+  --border: 0 0% 90%;
+  --input: 0 0% 90%;
+  --primary: 51 100% 50%;
+  --primary-foreground: 0 0% 0%;
+  --secondary: 0 0% 96%;
+  --secondary-foreground: 0 0% 10%;
+  --accent: 0 0% 96%;
+  --accent-foreground: 0 0% 10%;
+  --destructive: 0 62% 50%;
+  --destructive-foreground: 48 100% 85%;
+  --ring: 51 100% 50%;
+  --cuca-yellow: 51 100% 50%;
+  --cuca-red: 0 100% 45%;
+  --cuca-black: 0 0% 0%;
+}
+
+.dark {
+  --background: 0 0% 3%;
+  --foreground: 0 0% 98%;
+  --muted: 0 0% 14%;
+  --muted-foreground: 0 0% 63%;
+  --popover: 0 0% 3%;
+  --popover-foreground: 0 0% 98%;
+  --card: 0 0% 3%;
+  --card-foreground: 0 0% 98%;
+  --border: 0 0% 14%;
+  --input: 0 0% 14%;
+  --primary: 51 100% 50%;
+  --primary-foreground: 0 0% 0%;
+  --secondary: 0 0% 14%;
+  --secondary-foreground: 0 0% 98%;
+  --accent: 0 0% 14%;
+  --accent-foreground: 0 0% 98%;
+  --destructive: 0 62% 50%;
+  --destructive-foreground: 48 100% 85%;
+  --ring: 51 100% 50%;
+}
+
+body {
+  font-family: 'Open Sans', sans-serif;
+  background-color: hsl(var(--background));
+  color: hsl(var(--foreground));
+}
+
+.text-cuca-yellow { color: hsl(var(--cuca-yellow)); }
+.text-cuca-red { color: hsl(var(--cuca-red)); }
+.text-cuca-black { color: hsl(var(--cuca-black)); }
+.bg-cuca-yellow { background-color: hsl(var(--cuca-yellow)); }
+.bg-cuca-red { background-color: hsl(var(--cuca-red)); }
+.bg-cuca-black { background-color: hsl(var(--cuca-black)); }
+.border-cuca-yellow { border-color: hsl(var(--cuca-yellow)); }

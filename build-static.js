@@ -37,8 +37,8 @@ async function buildStatic() {
     // Use the existing vite configuration but with optimizations for speed
     process.env.NODE_ENV = 'production';
     
-    // Run build command directly
-    execSync('npx vite build --mode production', {
+    // Run build command with Netlify-specific config
+    execSync('npx vite build --config vite.config.netlify.ts --mode production', {
       cwd: path.resolve(__dirname, 'client'),
       stdio: 'inherit',
       env: {

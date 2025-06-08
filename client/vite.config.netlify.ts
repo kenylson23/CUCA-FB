@@ -14,34 +14,24 @@ export default defineConfig({
   build: {
     outDir: "../dist/public",
     emptyOutDir: true,
-    target: 'esnext',
-    minify: 'esbuild',
+    target: 'es2015',
+    minify: 'terser',
+    sourcemap: false,
     rollupOptions: {
       output: {
-        manualChunks: (id) => {
-          if (id.includes('node_modules')) {
-            if (id.includes('react') && !id.includes('react-dom')) {
-              return 'react-vendor';
-            }
-            if (id.includes('react-dom')) {
-              return 'react-dom-vendor';
-            }
-            if (id.includes('framer-motion')) {
-              return 'framer-motion';
-            }
-            if (id.includes('lucide-react')) {
-              return 'icons';
-            }
-            if (id.includes('@radix-ui')) {
-              return 'radix-ui';
-            }
-            return 'vendor';
-          }
-        }
+        manualChunks: undefined,
+        chunkFileNames: 'assets/[name]-[hash].js',
+        entryFileNames: 'assets/[name]-[hash].js',
+        assetFileNames: 'assets/[name]-[hash].[ext]'
       }
     }
   },
   esbuild: {
-    drop: ['console', 'debugger'],
+    target: 'es2015'
   },
+  define: {
+    global: 'globalThis',
+    'process.env.NODE_ENV': '"production"'
+  },
+  base: './'
 });

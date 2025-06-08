@@ -112,9 +112,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.json({ authenticated: false, user: null });
       }
 
+      // Determine user role using the same logic as login
+      let userRole = 'customer';
+      if (user.username?.toLowerCase().includes('admin') || 
+          user.email?.toLowerCase().includes('admin') ||
+          user.username === 'admin' ||
+          user.firstName?.toLowerCase() === 'admin') {
+        userRole = 'admin';
+      }
+
       // Don't return password
       const { password, ...userData } = user;
-      res.json({ authenticated: true, user: { ...userData, role: 'customer' } });
+      res.json({ authenticated: true, user: { ...userData, role: userRole } });
     } catch (error) {
       console.error('Session check error:', error);
       res.status(500).json({ message: 'Erro interno do servidor' });

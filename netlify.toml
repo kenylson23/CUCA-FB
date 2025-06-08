@@ -1,6 +1,6 @@
 [build]
   publish = "dist/public"
-  command = "node production-netlify-build.js"
+  command = "node netlify-quick-build.js"
 
 [build.environment]
   NODE_VERSION = "20"

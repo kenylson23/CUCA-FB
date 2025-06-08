@@ -141,8 +141,8 @@ body {
     });
     
     // Create Netlify redirects
-    const redirects = `/*    /index.html   200`;
-    fs.writeFileSync(path.join(distDir, '_redirects'), redirects);
+    const redirectsContent = '/*    /index.html   200';
+    fs.writeFileSync(path.join(distDir, '_redirects'), redirectsContent);
     
     // Verify build
     const indexPath = path.join(distDir, 'index.html');
